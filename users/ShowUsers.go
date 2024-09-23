@@ -41,9 +41,14 @@ func ShowUsers(t *pb.Request) (response *pb.Response) {
 	}
 
 	var count int64
-	status := true
-	db.Conn.Debug().Model(Users{}).Where("status = ?", status).Count(&count)
-	db.Conn.Debug().Where("status = ?", status).Limit(limit).Offset(offset).Find(&user)
+	if args["status"] != nil {
+		status := fmt.Sprintf("%v", args["status"])
+		db.Conn.Debug().Model(Users{}).Where("status = ?", status).Count(&count)
+		db.Conn.Debug().Where("status = ?", status).Limit(limit).Offset(offset).Find(&user)
+	} else {
+		db.Conn.Debug().Model(Users{}).Count(&count)
+		db.Conn.Debug().Limit(limit).Offset(offset).Find(&user)
+	}
 
 	allusers := []UserResponse{}
 
@@ -51,7 +56,6 @@ func ShowUsers(t *pb.Request) (response *pb.Response) {
 		user[i].Pass = ""
 		user[i].Mailsent = 0
 		user[i].Mailconfirmed = 0
-		user[i].Login = 0
 		user[i].IP = ""
 		user[i].Access = 0
 		user[i].Completed = false

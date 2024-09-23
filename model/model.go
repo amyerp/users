@@ -37,13 +37,13 @@ type Users struct {
 	Mailconfirmed int    `gorm:"column:mailconfirmed;:int;DEFAULT '0'" json:"mailconfirmed,omitempty"`
 	Created       int    `gorm:"column:created;type:int;DEFAULT '0'" json:"created,omitempty"`
 	Access        int    `gorm:"column:access;type:int;DEFAULT '0'" json:"access,omitempty"`
-	Login         int    `gorm:"column:login;type:int;DEFAULT '0'" json:"login,omitempty"`
+	Login         int    `gorm:"column:login;type:int;DEFAULT '0'" json:"login"`
 	IP            string `gorm:"column:ip;type:varchar(128); DEFAULT ''" json:"ip,omitempty"`
 	Status        bool   `gorm:"column:status;type:bool;DEFAULT 'false'" json:"status,omitempty"`
 	Completed     bool   `gorm:"column:completed;type:bool;DEFAULT 'false'" json:"completed,omitempty"`
 	IsAdmin       bool   `gorm:"column:is_admin;type:bool;DEFAULT 'false'" json:"isadmin"`
 	Readonly      bool   `gorm:"column:readonly;type:bool;DEFAULT 'false'" json:"readonly,omitempty"`
-	TFA           bool   `gorm:"column:tfa;type:bool;DEFAULT false;" json:"tfa,omitempty"`
+	TFA           bool   `gorm:"column:tfa;type:bool;DEFAULT false;" json:"tfa"`
 	TFAType       string `gorm:"column:tfatype;type:varchar(60);DEFAULT '';" json:"tfatype,omitempty"`
 }
 

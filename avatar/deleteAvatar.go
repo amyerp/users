@@ -18,6 +18,7 @@ func deleteAvatar(t *pb.Request) (response *pb.Response) {
 	GenUserAvatar(*t.UID, t)
 
 	ans["status"] = "OK"
-	return response
+
+	return Interfacetoresponse(t, ans)
 
 }

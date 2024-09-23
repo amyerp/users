@@ -80,7 +80,6 @@ func fileUpload(t *pb.Request) (response *pb.Response) {
 	db.Conn.Where("uid = ?", *t.UID).Updates(&userinfo)
 
 	ans["status"] = "OK"
-
-	return response
+	return Interfacetoresponse(t, ans)
 
 }

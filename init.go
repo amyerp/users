@@ -99,6 +99,10 @@ func admincheck(t *pb.Request) (response *pb.Response) {
 
 func detectbyuser(t *pb.Request) (response *pb.Response) {
 
+	if t.ParamID == nil {
+		return us.Init(t)
+	}
+
 	switch *t.ParamID {
 	case "avatar":
 		response = av.Init(t)

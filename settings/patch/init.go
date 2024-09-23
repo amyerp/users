@@ -25,6 +25,10 @@ func Init(t *pb.Request) (response *pb.Response) {
 		response = setnewemail(t)
 	case "profile":
 		response = updateprofile(t)
+	case "enable2fa":
+		response = enable2FA(t)
+	case "disable2fa":
+		response = disable2FA(t)
 	default:
 		response = ErrorReturn(t, 404, "0000129", "Missing argument")
 

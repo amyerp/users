@@ -5,12 +5,15 @@ import (
 	pb "github.com/gogufo/gufo-api-gateway/proto/go"
 )
 
-
 func Init(t *pb.Request) (response *pb.Response) {
 
 	switch *t.ParamID {
 	case "cron":
 		response = UpdateCron(t)
+	case "user":
+		response = CreateUser(t)
+	case "resendinvitation":
+		response = ResendInvitation(t)
 	default:
 		response = ErrorReturn(t, 404, "000012", "Missing argument")
 	}

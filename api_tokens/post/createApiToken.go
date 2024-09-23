@@ -10,8 +10,8 @@
 package post
 
 import (
+	"encoding/json"
 	"fmt"
-	"strconv"
 	"time"
 
 	. "user/model"
@@ -26,34 +26,10 @@ import (
 )
 
 func createApiToken(t *pb.Request) (response *pb.Response) {
-	// POST api/v2/user/api_token/create
 	ans := make(map[string]interface{})
 	args := ToMapStringInterface(t.Args)
-
-	if *t.Method != "POST" {
-
-		response = ErrorReturn(t, 400, "000005", "Wrong Method")
-		return response
-	}
-
 	p := bluemonday.UGCPolicy()
-	tokenName := p.Sanitize(fmt.Sprintf("%v", args["name"]))
-	isAdmin := p.Sanitize(fmt.Sprintf("%v", args["isAdmin"]))
-	expiration := p.Sanitize(fmt.Sprintf("%v", args["expiration"]))
-	comment := p.Sanitize(fmt.Sprintf("%v", args["comment"]))
-	readOnly := p.Sanitize(fmt.Sprintf("%v", args["readonly"]))
 
-	if isAdmin == "" {
-		isAdmin = "0"
-	}
-	if expiration == "" {
-		expiration = "0"
-	}
-	if readOnly == "" {
-		readOnly = "0"
-	}
-
-	//Check DB and table config
 	db, err := ConnectDBv2()
 	if err != nil {
 		if viper.GetBool("server.sentry") {
@@ -62,66 +38,67 @@ func createApiToken(t *pb.Request) (response *pb.Response) {
 			SetErrorLog(err.Error())
 		}
 
-		response = ErrorReturn(t, 500, "000027", err.Error())
-		return response
+		return ErrorReturn(t, 500, "000027", err.Error())
 	}
 
-	APIToken := &APITokens{}
+	newdata := APITokens{}
 
-	//Create TokenID
-	APIToken.TokenId = Hashgen(12)
-	APIToken.Created = int(time.Now().Unix())
+	JsonArgs, err := json.Marshal(args)
+	if err != nil {
+		return ErrorReturn(t, 500, "000028", err.Error())
+	}
+
+	err = json.Unmarshal(JsonArgs, &newdata)
+	if err != nil {
+		return ErrorReturn(t, 500, "000028", err.Error())
+	}
+
+	tokenid := Hashgen(12)
+	newdata.TokenId = tokenid
+	newdata.Created = int(time.Now().Unix())
+
+	expiration := p.Sanitize(fmt.Sprintf("%v", args["expiration_string"]))
+	if expiration == "" {
+		expiration = "0"
+	}
 
 	//Create Token
 	apitkn := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user":    t.UID,
+		"user":    *t.UID,
 		"exipred": expiration,
-		"tokenid": APIToken.TokenId,
+		"tokenid": tokenid,
 	})
 
-	APIToken.Token, _ = apitkn.SignedString([]byte(viper.GetString("token.secretKey")))
+	newdata.Token, _ = apitkn.SignedString([]byte(viper.GetString("token.secretKey")))
+	newdata.UID = *t.UID
+	newdata.Expiration = convertTimeToTimestamp(expiration)
+	newdata.Status = true
 
-	//Fill data
-	APIToken.UID = *t.UID
-	APIToken.Expiration, _ = strconv.Atoi(expiration) //TODO: add conversion from text format to unix time
-	APIToken.Status = true
-
-	APIToken.IsAdmin = false
-	if isAdmin == "1" {
-		isad := false
-		if *t.IsAdmin == 1 {
-			isad = true
-		}
-		APIToken.IsAdmin = isad
-	}
-
-	redo, _ := strconv.Atoi(readOnly)
-	if redo == 1 {
-		APIToken.Readonly = true
-	} else {
-		APIToken.Readonly = false
-	}
-
-	APIToken.Comment = comment
-	APIToken.TokenName = tokenName
-
-	//Check for table
-	if !db.Conn.Migrator().HasTable(&APITokens{}) {
-
-		//Create languages table
-		db.Conn.Set("gorm:table_options", "ENGINE=InnoDB;").Migrator().CreateTable(&APITokens{})
-	}
-
-	err = db.Conn.Create(&APIToken).Error
+	err = db.Conn.Create(&newdata).Error
 	if err != nil {
 		response = ErrorReturn(t, 400, "000005", err.Error())
 		return response
 	}
 
-	ans["tokenid"] = APIToken.TokenId
-	ans["created"] = APIToken.Created
-	ans["api_token"] = APIToken.Token
+	ans["tokenid"] = newdata.TokenId
+	ans["created"] = newdata.Created
+	ans["api_token"] = newdata.Token
 
 	response = Interfacetoresponse(t, ans)
 	return response
+}
+
+func convertTimeToTimestamp(date string) int {
+	//Check the documentation on Go for the const variables!
+	//They need to be exactly as they are shown in the documentation to be read correctly!
+	format := "2006-01-02"
+
+	t, err := time.Parse(format, date)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(t.Unix())
+		return int(t.Unix())
+	}
+	return 0
 }

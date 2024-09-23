@@ -19,6 +19,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	pb "github.com/gogufo/gufo-api-gateway/proto/go"
 	"github.com/spf13/viper"
+	"golang.org/x/crypto/bcrypt"
 
 	. "github.com/gogufo/gufo-api-gateway/gufodao"
 	"github.com/microcosm-cc/bluemonday"
@@ -40,13 +41,19 @@ func initialsetnewemail(t *pb.Request) (response *pb.Response) {
 	ans := make(map[string]interface{})
 	args := ToMapStringInterface(t.Args)
 
-	//TODO: check does alowed to change email
+	ischange := viper.GetBool("settings.change_email")
 
-	if args["email"] == nil {
-		return ErrorReturn(t, 406, "000012", "Missing  email")
+	if !ischange {
+		return ErrorReturn(t, 403, "000010", "You are not allowed to change email. Please contact your Administrator with such request")
 	}
+
+	if args["email"] == nil || args["password"] == nil {
+		return ErrorReturn(t, 406, "000012", "Missing  Important Data")
+	}
+
 	p := bluemonday.UGCPolicy()
 	email := p.Sanitize(fmt.Sprintf("%v", args["email"]))
+	password := p.Sanitize(fmt.Sprintf("%v", args["password"]))
 
 	//Check does suck email is exist in DB
 	db, err := ConnectDBv2()
@@ -56,6 +63,15 @@ func initialsetnewemail(t *pb.Request) (response *pb.Response) {
 		} else {
 			SetErrorLog(err.Error())
 		}
+	}
+
+	//Check old password
+	var userExist Users
+	db.Conn.Debug().Where(`uid = ?`, *t.UID).First(&userExist)
+	if err := bcrypt.CompareHashAndPassword([]byte(userExist.Pass), []byte(password)); err != nil {
+		// Password not matched
+		return ErrorReturn(t, 400, "000008", "Password not matched")
+
 	}
 
 	var count int64
@@ -68,8 +84,14 @@ func initialsetnewemail(t *pb.Request) (response *pb.Response) {
 	//generate code
 	otp := Numgen(6)
 
+	lang := "eng"
+	if t.Language != nil {
+		lang = *t.Language
+	}
+
 	//send code to email
-	go SendOTP(t, email, *t.Language, otp)
+	go SendOTP(t, email, lang, otp)
+	go SendTimeHash(t, otp, userExist.Name, "tfa", email, 300)
 
 	ans["response"] = "100201"
 	response = Interfacetoresponse(t, ans)
@@ -98,8 +120,10 @@ func updatenewemail(t *pb.Request) (response *pb.Response) {
 
 	// Check for OTP livetime
 	ctime := int(time.Now().Unix())
+	SetErrorLog(fmt.Sprintf("ctime: %v", ctime))
+	SetErrorLog(fmt.Sprintf("lifetime: %v", lifetime))
 
-	if ctime > lifetime {
+	if lifetime < ctime {
 		//Delete OTP
 		go DeleteTimeHash(t, code, email)
 		return ErrorReturn(t, 400, "000022", "Code has expired")
@@ -118,7 +142,7 @@ func updatenewemail(t *pb.Request) (response *pb.Response) {
 	}
 
 	//Update email in users table
-	err = db.Conn.Model(&Users{}).Where("uid = ?", *t.UID).Updates(map[string]interface{}{"mail": email}).Error
+	err = db.Conn.Model(&Users{}).Where("uid = ?", *t.UID).Updates(map[string]interface{}{"mail": email, "mailconfirmed": int(time.Now().Unix())}).Error
 	if err != nil {
 		response = ErrorReturn(t, 400, "000005", err.Error())
 		return response

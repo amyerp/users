@@ -7,9 +7,10 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gabriel-vasile/mimetype v1.4.5
 	github.com/getsentry/sentry-go v0.27.0
-	github.com/gogufo/gufo-api-gateway v1.15.1
+	github.com/gogufo/gufo-api-gateway v1.17.0
 	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/spf13/viper v1.18.2
+	golang.org/x/crypto v0.25.0
 	golang.org/x/net v0.27.0
 	google.golang.org/grpc v1.63.2
 	gorm.io/gorm v1.25.5
@@ -41,7 +42,6 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
-	golang.org/x/crypto v0.25.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect

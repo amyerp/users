@@ -7,14 +7,23 @@
 //  Proprietary and confidential                                                //
 //////////////////////////////////////////////////////////////////////////////////
 
-package post
+package patch
 
 import (
+	. "github.com/gogufo/gufo-api-gateway/gufodao"
 	pb "github.com/gogufo/gufo-api-gateway/proto/go"
 )
 
-func switchApiToken(t *pb.Request) (response *pb.Response) {
-	// api/user/avatar
+func Init(t *pb.Request) (response *pb.Response) {
+	switch *t.ParamIDD {
+	case "switch":
+		response = SwithTokenStatus(t)
+	case "comment":
+		response = UpdateTokenComment(t)
+	default:
+		response = ErrorReturn(t, 404, "000014", "Missing Param")
+	}
 
 	return response
+
 }

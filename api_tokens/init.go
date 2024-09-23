@@ -27,7 +27,7 @@ func Init(t *pb.Request) (response *pb.Response) {
 	case "GET":
 		response = gt.ShowApiToken(t)
 	case "PATCH":
-		response = pt.UpdateApiToken(t)
+		response = pt.Init(t)
 	case "DELETE":
 		response = dl.DeleteApiToken(t)
 	default:

@@ -22,8 +22,8 @@ github.com/go-errors/errors v1.4.2 h1:J6MZopCL4uSllY1OfXM374weqZFFItUbrImctkmUxI
 github.com/go-errors/errors v1.4.2/go.mod h1:sIVyrIiJhuEF+Pj9Ebtd6P/rEYROXFi3BopGUQ5a5Og=
 github.com/go-sql-driver/mysql v1.7.0 h1:ueSltNNllEqE3qcWBTD0iQd3IpL/6U+mJxLkazJ7YPc=
 github.com/go-sql-driver/mysql v1.7.0/go.mod h1:OXbVy3sEdcQ2Doequ6Z5BW6fXNQTmx+9S1MCJN5yJMI=
-github.com/gogufo/gufo-api-gateway v1.15.1 h1:tUwVtdzcggA/aZMSyRw7e2+7/NlifEr/VdlnWzG+gmE=
-github.com/gogufo/gufo-api-gateway v1.15.1/go.mod h1:HanzSD4tGqTmW0N94MkKW+RQ/CP8fKBBRzd9/C9Ys+w=
+github.com/gogufo/gufo-api-gateway v1.17.0 h1:r19PQibxQVuO+Aiw3uVrd1t49/IF7A9m6QPkWwdzOQI=
+github.com/gogufo/gufo-api-gateway v1.17.0/go.mod h1:HanzSD4tGqTmW0N94MkKW+RQ/CP8fKBBRzd9/C9Ys+w=
 github.com/golang/protobuf v1.5.4 h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=
 github.com/golang/protobuf v1.5.4/go.mod h1:lnTiLA8Wa4RWRcIUkrtSVa5nRhsEGBg48fD6rSs7xps=
 github.com/gomodule/redigo v1.8.9 h1:Sl3u+2BI/kk+VEatbj0scLdrFhjPmbxOc1myhDP41ws=

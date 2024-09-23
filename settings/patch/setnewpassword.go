@@ -76,6 +76,9 @@ func setnewpassword(t *pb.Request) (response *pb.Response) {
 		return response
 	}
 
+	//TODO send notification
+	//Create Event
+
 	ans["answer"] = "OK"
 	response = Interfacetoresponse(t, ans)
 	return response

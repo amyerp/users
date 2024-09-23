@@ -11,8 +11,6 @@ package users
 
 import (
 	pb "github.com/gogufo/gufo-api-gateway/proto/go"
-
-	. "github.com/gogufo/gufo-api-gateway/gufodao"
 )
 
 func Init(t *pb.Request) (response *pb.Response) {
@@ -21,7 +19,7 @@ func Init(t *pb.Request) (response *pb.Response) {
 	case "users":
 		response = ShowUsers(t)
 	default:
-		response = ErrorReturn(t, 404, "000014", "Missing Param")
+		response = ShowUser(t)
 	}
 	return response
 

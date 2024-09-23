@@ -7,19 +7,19 @@
 //  Proprietary and confidential                                                //
 //////////////////////////////////////////////////////////////////////////////////
 
-package delete
+package patch
 
 import (
 	. "user/model"
 
-	. "github.com/gogufo/gufo-api-gateway/gufodao"
-
 	"github.com/getsentry/sentry-go"
+	. "github.com/gogufo/gufo-api-gateway/gufodao"
 	pb "github.com/gogufo/gufo-api-gateway/proto/go"
 	"github.com/spf13/viper"
 )
 
-func DeleteApiToken(t *pb.Request) (response *pb.Response) {
+// PATCH api/v2/user/api_token/{tokenid}/switch
+func SwithTokenStatus(t *pb.Request) (response *pb.Response) {
 
 	ans := make(map[string]interface{})
 
@@ -45,12 +45,14 @@ func DeleteApiToken(t *pb.Request) (response *pb.Response) {
 		return ErrorReturn(t, 400, "000003", "There is no such token")
 	}
 
-	vc := APITokens{}
-	db.Conn.Where("tokenid = ?", dataid).Delete(&vc)
+	err = db.Conn.Debug().Model(APITokens{}).Where("tokenid = ?", dataid).Update("status", !curdata.Status).Error
+	if err != nil {
+		return ErrorReturn(t, 400, "000005", err.Error())
+	}
 
 	//TODO: Record event
 
-	ans["answer"] = "OK"
+	ans["tokenid"] = dataid
 	response = Interfacetoresponse(t, ans)
 	return response
 }
